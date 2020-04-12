@@ -21,7 +21,7 @@ class App extends React.Component {
       movies: [],
       moviesWillWach: [],
       sort_by: "popularity.desc",
-      page: 25,
+      page: 1,
       total_pages: 500,
     };
   }
