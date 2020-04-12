@@ -3,6 +3,7 @@ import { API_URL, API_KEY_3, API_KEY_4 } from "../utils/api";
 //import { moviesData } from "../moviesData.js";
 import MovieItem from "../components/MovieItem";
 import MovieTabs from "../components/MovieTabs";
+import Pagination from "../components/Pagination";
 
 // function removeMovie(movie) {
 //   const updateMovies = this.state.movies.filter(function (item) {
@@ -20,13 +21,39 @@ class App extends React.Component {
       movies: [],
       moviesWillWach: [],
       sort_by: "popularity.desc",
+      page: 25,
+      total_pages: 500,
     };
   }
+  // onChangePagination = (page) => {
+  //   this.setState({
+  //     page: page,
+  //   });
+  // };
 
   componentDidMount() {
     console.log("didMount");
+    this.getMovies();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // console.log("did update");
+    // console.log("prev", prevProps, prevState);
+    // console.log("this", this.props, this.state);
+    if (prevState.sort_by != this.state.sort_by) {
+      console.log("call api");
+      this.getMovies();
+    }
+    if (prevState.page != this.state.page) {
+      console.log("call page");
+      this.getMovies(this.state.page);
+      console.log(this.state.page);
+    }
+  }
+
+  getMovies = () => {
     fetch(
-      `${API_URL}/discover/movie?api_key=${API_KEY_3}&sort_by=${this.state.sort_by}`
+      `${API_URL}/discover/movie?api_key=${API_KEY_3}&language=ru-ru&sort_by=${this.state.sort_by}&page=${this.state.page}`
     )
       .then((response) => {
         return response.json();
@@ -35,11 +62,9 @@ class App extends React.Component {
         this.setState({
           movies: data.results,
         });
-        console.log(this.state.movies);
+        console.log(this.state.page);
       });
-  }
-
-  componentWillUnmount() {}
+  };
 
   removeMovie = (movie) => {
     const updateMovies = this.state.movies.filter(function (item) {
@@ -73,7 +98,13 @@ class App extends React.Component {
   };
 
   updateSortBy = (value) => {
-    this.setState({ sort_by: value });
+    this.setState({ sort_by: value, page: 1 });
+  };
+
+  updatePages = (value) => {
+    this.setState({
+      page: value,
+    });
   };
 
   render() {
@@ -99,6 +130,8 @@ class App extends React.Component {
                       removeMovie={this.removeMovie}
                       addMovieToWillWatch={this.addMovieToWillWatch}
                       removeMovieToWillWatch={this.removeMovieToWillWatch}
+                      // pagination={this.pagination}
+                      onChangePagination={this.onChangePagination}
                     />
                   </div>
                 );
@@ -106,6 +139,11 @@ class App extends React.Component {
             </div>
           </div>
           <div className="col-md-3">
+            <Pagination
+              page={this.state.page}
+              total_pages={this.state.total_pages}
+              updatePages={this.updatePages}
+            />
             <p>Will watch : {this.state.moviesWillWach.length}</p>
             <ul>
               {this.state.moviesWillWach.map((movie) => {
